@@ -29,10 +29,6 @@ body {
   margin: 0 auto 10px;
 }
 
-.wheel-container {
-  position: relative;
-}
-
 canvas {
   border-radius: 50%;
   background: #fff;
@@ -48,6 +44,11 @@ button {
   color: #fff;
   cursor: pointer;
 }
+
+#result {
+  margin-top: 15px;
+  font-size: 16px;
+}
 </style>
 </head>
 
@@ -55,14 +56,9 @@ button {
 
 <div class="container">
   <div class="arrow"></div>
-
-  <div class="wheel-container">
-    <canvas id="wheel" width="390" height="390"></canvas>
-  </div>
-
+  <canvas id="wheel" width="340" height="340"></canvas>
   <button onclick="spin()">Çarkı Çevir</button>
-
-  <p id="result"></p>
+  <div id="result"></div>
 </div>
 
 <script>
@@ -70,7 +66,7 @@ const tasks = [
   "Bugün kimsenin sözünü kesme, sadece canıgönülden dinle.",
   "Bugün hiç şikayet etme, sadece olanın güzel yanını gör.",
   "En gergin anında bile ses tonunu bir tık alçaltarak konuş.",
-  "Kimsenin haberi olmadan birinin bir işini kolaylaştır",
+  "Kimsenin haberi olmadan birinin bir işini kolaylaştır.",
   "Karşılaştığın ilk kişiye selam ver.",
   "Bir canlıya (kuş, kedi, çiçek) su ver."
 ];
@@ -82,11 +78,34 @@ const colors = [
 
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
+
 const size = canvas.width;
 const center = size / 2;
 const sliceAngle = 2 * Math.PI / tasks.length;
 
 let currentAngle = 0;
+
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(" ");
+  let line = "";
+  let lines = [];
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line + words[i] + " ";
+    if (ctx.measureText(testLine).width > maxWidth && i > 0) {
+      lines.push(line);
+      line = words[i] + " ";
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+
+  const offsetY = y - (lines.length - 1) * lineHeight / 2;
+  lines.forEach((l, i) => {
+    ctx.fillText(l.trim(), x, offsetY + i * lineHeight);
+  });
+}
 
 function drawWheel() {
   for (let i = 0; i < tasks.length; i++) {
@@ -102,10 +121,20 @@ function drawWheel() {
     ctx.save();
     ctx.translate(center, center);
     ctx.rotate(start + sliceAngle / 2);
+
     ctx.textAlign = "right";
     ctx.fillStyle = "#fff";
-    ctx.font = "12px Arial";
-    ctx.fillText(tasks[i], center - 25, 4);
+    ctx.font = "11px Arial";
+
+    drawWrappedText(
+      ctx,
+      tasks[i],
+      center - 22,
+      0,
+      110,
+      14
+    );
+
     ctx.restore();
   }
 }
@@ -119,9 +148,9 @@ function spin() {
   canvas.style.transition = "transform 4s ease-out";
   canvas.style.transform = `rotate(${currentAngle}deg)`;
 
-  const selectedIndex = Math.floor(
-    tasks.length - (currentAngle % 360) / (360 / tasks.length)
-  ) % tasks.length;
+  const selectedIndex =
+    Math.floor(tasks.length - (currentAngle % 360) / (360 / tasks.length)) %
+    tasks.length;
 
   setTimeout(() => {
     document.getElementById("result").innerHTML =
