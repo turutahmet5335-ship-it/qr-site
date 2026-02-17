@@ -57,7 +57,7 @@ button {
   <div class="arrow"></div>
 
   <div class="wheel-container">
-    <canvas id="wheel" width="400" height="400"></canvas>
+    <canvas id="wheel" width="390" height="390"></canvas>
   </div>
 
   <button onclick="spin()">Çarkı Çevir</button>
@@ -104,7 +104,7 @@ function drawWheel() {
     ctx.rotate(start + sliceAngle / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "#fff";
-    ctx.font = "14px Arial";
+    ctx.font = "11px Arial";
     ctx.fillText(tasks[i], center - 10, 5);
     ctx.restore();
   }
