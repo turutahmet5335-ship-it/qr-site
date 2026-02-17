@@ -49,12 +49,68 @@
             color: #999;
         }
     </style>
+    .container {
+  max-width: 400px;
+  margin: 30px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+#wheel {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  border: 8px solid #333;
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  transition: transform 3s ease-out;
+}
+</style>
 </head>
 
 <body>
 
 <div class="kutu">
+ <h2>🎡 Görev Çarkı</h2>
 
+  <div id="wheel">Hazır</div>
+
+  <button onclick="spin()">Çarkı Çevir</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+const tasks = [
+  "10 şınav çek",
+  "1 bardak su iç",
+  "5 dakika kitap oku"
+];
+
+let angle = 0;
+
+function spin() {
+  const wheel = document.getElementById("wheel");
+  const result = document.getElementById("result");
+
+  const randomIndex = Math.floor(Math.random() * tasks.length);
+  const spins = Math.floor(Math.random() * 5) + 5;
+
+  angle += spins * 360;
+  wheel.style.transform = `rotate(${angle}deg)`;
+
+  setTimeout(() => {
+    result.innerHTML = "🎯 Görev: <b>" + tasks[randomIndex] + "</b>";
+    wheel.innerHTML = tasks[randomIndex];
+  }, 3000);
+}
+</script>
     <h1>Hoş Geldiniz</h1>
 
     <p>
