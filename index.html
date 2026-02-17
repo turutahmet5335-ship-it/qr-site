@@ -1,125 +1,137 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>QR Kod Sayfası</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Görev Çarkı</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-        }
-
-        .kutu {
-            max-width: 600px;
-            margin: 20px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        h1 {
-            color: #333;
-        }
-
-        p {
-            color: #555;
-            font-size: 16px;
-        }
-
-        img {
-            width: 100%;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-
-        video {
-            width: 100%;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-
-        .alt {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #999;
-        }
-    </style>
-    .container {
-  max-width: 400px;
-  margin: 30px auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-}
-
-#wheel {
-  width: 250px;
-  height: 250px;
-  border-radius: 50%;
-  border: 8px solid #333;
-  margin: 20px auto;
+<style>
+body {
+  margin: 0;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
-  transition: transform 3s ease-out;
+  background: #f2f2f2;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  text-align: center;
+}
+
+.arrow {
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 25px solid #333;
+  margin: 0 auto 10px;
+}
+
+.wheel-container {
+  position: relative;
+}
+
+canvas {
+  border-radius: 50%;
+  background: #fff;
+}
+
+button {
+  margin-top: 20px;
+  padding: 14px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #4CAF50;
+  color: #fff;
+  cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="kutu">
- <h2>🎡 Görev Çarkı</h2>
+<div class="container">
+  <div class="arrow"></div>
 
-  <div id="wheel">Hazır</div>
+  <div class="wheel-container">
+    <canvas id="wheel" width="300" height="300"></canvas>
+  </div>
 
   <button onclick="spin()">Çarkı Çevir</button>
 
-  <div id="result"></div>
+  <p id="result"></p>
 </div>
 
 <script>
 const tasks = [
-  "10 şınav çek",
-  "1 bardak su iç",
-  "5 dakika kitap oku"
+  "Bugün kimsenin sözünü kesme, sadece canıgönülden dinle.",
+  "Bugün hiç şikayet etme, sadece olanın güzel yanını gör.",
+  "En gergin anında bile ses tonunu bir tık alçaltarak konuş.",
+  "Kimsenin haberi olmadan birinin bir işini kolaylaştır",
+  "Karşılaştığın ilk kişiye selam ver.",
+  "Bir canlıya (kuş, kedi, çiçek) su ver."
 ];
 
-let angle = 0;
+const colors = [
+  "#f44336", "#2196F3", "#4CAF50",
+  "#FFC107", "#9C27B0", "#FF9800"
+];
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const size = canvas.width;
+const center = size / 2;
+const sliceAngle = 2 * Math.PI / tasks.length;
+
+let currentAngle = 0;
+
+function drawWheel() {
+  for (let i = 0; i < tasks.length; i++) {
+    const start = sliceAngle * i;
+    const end = start + sliceAngle;
+
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, center, start, end);
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(start + sliceAngle / 2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fff";
+    ctx.font = "14px Arial";
+    ctx.fillText(tasks[i], center - 10, 5);
+    ctx.restore();
+  }
+}
+
+drawWheel();
 
 function spin() {
-  const wheel = document.getElementById("wheel");
-  const result = document.getElementById("result");
+  const spinAngle = Math.random() * 360 + 1440;
+  currentAngle += spinAngle;
 
-  const randomIndex = Math.floor(Math.random() * tasks.length);
-  const spins = Math.floor(Math.random() * 5) + 5;
+  canvas.style.transition = "transform 4s ease-out";
+  canvas.style.transform = `rotate(${currentAngle}deg)`;
 
-  angle += spins * 360;
-  wheel.style.transform = `rotate(${angle}deg)`;
+  const selectedIndex = Math.floor(
+    tasks.length - (currentAngle % 360) / (360 / tasks.length)
+  ) % tasks.length;
 
   setTimeout(() => {
-    result.innerHTML = "🎯 Görev: <b>" + tasks[randomIndex] + "</b>";
-    wheel.innerHTML = tasks[randomIndex];
-  }, 3000);
+    document.getElementById("result").innerHTML =
+      "🎯 Görev: <b>" + tasks[selectedIndex] + "</b>";
+  }, 4000);
 }
 </script>
-    <h1>Hoş Geldiniz</h1>
 
-    <p>
-        
-    
-    </p>
-
-    <!-- FOTOĞRAF -->
-<image src="<img src="Screenshot_20260217_203212_Google.jpg">
+</body>
+</html>
      
 
 
