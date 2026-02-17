@@ -120,7 +120,7 @@ function drawWheel() {
 
     ctx.save();
     ctx.translate(center, center);
-    ctx.rotate(start + sliceAngle / 2);
+    ctx.rotate(start + sliceAngle / 2 - Math.PI / 2);
 
     ctx.textAlign = "right";
     ctx.fillStyle = "#fff";
