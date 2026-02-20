@@ -109,26 +109,36 @@ function drawWheel() {
     ctx.moveTo(center, center);
     ctx.arc(center, center, center, start, end);
     ctx.fillStyle = colors[i % colors.length];
-    ctx.fill();
 
     ctx.save();
-    ctx.translate(başlangıç + dilim açısı / 2 - Math.PI / 2);
-    ctx.rotate(start + sliceAngle / 2 - Math.PI / 2);
+ctx.translate(center, center);
 
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#fff";
-    ctx.font = "11px Arial";
+// angle of the middle of the slice
+const middleAngle = startAngle + sliceAngle / 2;
 
-    drawWrappedText(
-      ctx,
-      tasks[i],
-      center - 22, 
-      0,
-      110,
-      14
-    );
+// rotate to slice center
+ctx.rotate(middleAngle);
 
-    ctx.restore();
+// keep text upright
+ctx.rotate(Math.PI / 2);
+
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+
+// OPTIONAL: text color based on slice color
+ctx.fillStyle = getTextColor(colors[i % colors.length]);
+ctx.font = "12px Arial";
+
+drawWrappedText(
+  ctx,
+  tasks[i],
+  0,
+  -center * 0.6, // exact radial center of the slice
+  140,
+  16
+);
+
+ctx.restore();
   }
 }
 
