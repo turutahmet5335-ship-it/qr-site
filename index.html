@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Task Wheel</title>
 <style>
   body {
@@ -16,30 +16,35 @@
     font-family: Arial, sans-serif;
   }
   button {
-    margin-top: 20px;
+    margin-top: 16px;
     padding: 12px 24px;
     font-size: 16px;
     border: none;
     border-radius: 8px;
     background: #4CAF50;
-    color: white;
+    color: #fff;
     cursor: pointer;
+  }
+  #result {
+    margin-top: 14px;
+    font-size: 18px;
+    font-weight: bold;
   }
 </style>
 </head>
 <body>
 
 <canvas id="wheel" width="340" height="340"></canvas>
-  <p id="result" style="margin-top:15px;font-size:18px;font-weight:bold;"></p>
 <button onclick="spin()">Spin</button>
+<div id="result"></div>
 
 <script>
 const tasks = [
   "Listen sincerely without interrupting",
-  "Do not complain today, see the good",
-  "Speak calmly even when nervous",
-  "Help someone without being noticed",
-  "Greet the first person you meet",
+  "Do not complain today",
+  "Speak calmly",
+  "Help someone silently",
+  "Smile at the first person",
   "Give water to a living being"
 ];
 
@@ -54,13 +59,15 @@ const colors = [
 
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
+
 const size = canvas.width;
 const center = size / 2;
 const sliceAngle = (2 * Math.PI) / tasks.length;
 
-let currentAngle = 0;
+let angle = 0;
+let spinning = false;
 
-/* TEXT COLOR BASED ON SLICE COLOR */
+/* text color by slice color */
 function getTextColor(hex) {
   const r = parseInt(hex.substr(1,2),16);
   const g = parseInt(hex.substr(3,2),16);
@@ -69,17 +76,17 @@ function getTextColor(hex) {
   return brightness > 150 ? "#000" : "#fff";
 }
 
-/* MULTI-LINE CENTERED TEXT */
+/* wrapped centered text */
 function drawWrappedText(text, y, maxWidth, lineHeight) {
   const words = text.split(" ");
   let line = "";
   let lines = [];
 
-  for (let i = 0; i < words.length; i++) {
-    const test = line + words[i] + " ";
-    if (ctx.measureText(test).width > maxWidth && i > 0) {
+  for (let w of words) {
+    const test = line + w + " ";
+    if (ctx.measureText(test).width > maxWidth && line !== "") {
       lines.push(line);
-      line = words[i] + " ";
+      line = w + " ";
     } else {
       line = test;
     }
@@ -92,12 +99,12 @@ function drawWrappedText(text, y, maxWidth, lineHeight) {
   });
 }
 
-/* DRAW WHEEL */
+/* draw wheel */
 function drawWheel() {
   ctx.clearRect(0, 0, size, size);
 
   for (let i = 0; i < tasks.length; i++) {
-    const start = currentAngle + i * sliceAngle;
+    const start = angle + i * sliceAngle;
     const end = start + sliceAngle;
     const sliceColor = colors[i];
 
@@ -123,32 +130,58 @@ function drawWheel() {
 
     ctx.restore();
   }
+
+  // top indicator
+  ctx.beginPath();
+  ctx.moveTo(center - 10, 10);
+  ctx.lineTo(center + 10, 10);
+  ctx.lineTo(center, 30);
+  ctx.fillStyle = "#000";
+  ctx.fill();
 }
 
+/* spin logic */
 function spin() {
-  const spinAngle = Math.random() * 360 + 1440;
-  currentAngle += spinAngle * Math.PI / 180;
+  if (spinning) return;
+  spinning = true;
+  document.getElementById("result").innerText = "";
 
-  canvas.style.transition = "transform 4s ease-out";
-  canvas.style.transform = `rotate(${currentAngle}rad)`;
+  const targetRotation =
+    angle + Math.random() * 6 * Math.PI + 8 * Math.PI;
 
-  setTimeout(() => {
-    // Normalize angle (0 - 2PI)
-    const normalizedAngle =
-      (2 * Math.PI - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
+  const start = performance.now();
+  const duration = 4000;
 
-    const index =
-      Math.floor(normalizedAngle / sliceAngle) % tasks.length;
+  function animate(t) {
+    const progress = Math.min((t - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    angle = angle + (targetRotation - angle) * ease;
 
-    document.getElementById("result").innerText =
-      "Selected task: " + tasks[index];
-  }, 4000);
+    drawWheel();
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      spinning = false;
+      showResult();
+    }
+  }
+
+  requestAnimationFrame(animate);
 }
+
+/* show selected task */
+function showResult() {
+  const normalized =
+    (2 * Math.PI - (angle % (2 * Math.PI))) % (2 * Math.PI);
+  const index = Math.floor(normalized / sliceAngle) % tasks.length;
+
+  document.getElementById("result").innerText =
+    "Selected task: " + tasks[index];
 }
 
 drawWheel();
 </script>
 
 </body>
-</html>  
-
+</html>
