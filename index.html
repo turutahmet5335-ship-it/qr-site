@@ -1,172 +1,139 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Görev Çarkı</title>
-
+<title>Task Wheel</title>
 <style>
-body {
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f2f2f2;
-  font-family: Arial, sans-serif;
-}
-
-.container {
-  text-align: center;
-}
-
-
-
-canvas {
-  border-radius: 50%;
-  background: #fff;
-}
-
-button {
-  margin-top: 20px;
-  padding: 14px 24px;
-  font-size: 16px;
-  border: none;
-  border-radius: 10px;
-  background: #4CAF50;
-  color: #fff;
-  cursor: pointer;
-}
-
-#result {
-  margin-top: 15px;
-  font-size: 16px;
-}
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f2f2f2;
+    font-family: Arial, sans-serif;
+  }
+  button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #4CAF50;
+    color: white;
+    cursor: pointer;
+  }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-  
-  <canvas id="wheel" width="340" height="340"></canvas>
-  <button onclick="spin()">Çarkı Çevir</button>
-  <div id="result"></div>
-</div>
+<canvas id="wheel" width="340" height="340"></canvas>
+<button onclick="spin()">Spin</button>
 
 <script>
 const tasks = [
-  "Bugün kimsenin sözünü kesme, sadece canıgönülden dinle.",
-  "Bugün hiç şikayet etme, sadece olanın güzel yanını gör.",
-  "En gergin anında bile ses tonunu bir tık alçaltarak konuş.",
-  "Kimsenin haberi olmadan birinin bir işini kolaylaştır.",
-  "Karşılaştığın ilk kişiye selam ver.",
-  "Bir canlıya (kuş, kedi, çiçek) su ver."
+  "Listen sincerely without interrupting",
+  "Do not complain today, see the good",
+  "Speak calmly even when nervous",
+  "Help someone without being noticed",
+  "Greet the first person you meet",
+  "Give water to a living being"
 ];
 
 const colors = [
-  "#f44336", "#2196F3", "#4CAF50",
-  "#FFC107", "#9C27B0", "#FF9800"
+  "#F44336",
+  "#FF9800",
+  "#FFEB3B",
+  "#4CAF50",
+  "#2196F3",
+  "#9C27B0"
 ];
 
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
-
 const size = canvas.width;
 const center = size / 2;
-const sliceAngle = 2 * Math.PI / tasks.length;
+const sliceAngle = (2 * Math.PI) / tasks.length;
 
 let currentAngle = 0;
 
-function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+/* TEXT COLOR BASED ON SLICE COLOR */
+function getTextColor(hex) {
+  const r = parseInt(hex.substr(1,2),16);
+  const g = parseInt(hex.substr(3,2),16);
+  const b = parseInt(hex.substr(5,2),16);
+  const brightness = (r*299 + g*587 + b*114) / 1000;
+  return brightness > 150 ? "#000" : "#fff";
+}
+
+/* MULTI-LINE CENTERED TEXT */
+function drawWrappedText(text, y, maxWidth, lineHeight) {
   const words = text.split(" ");
   let line = "";
   let lines = [];
 
   for (let i = 0; i < words.length; i++) {
-    const testLine = line + words[i] + " ";
-    if (ctx.measureText(testLine).width > maxWidth && i > 0) {
+    const test = line + words[i] + " ";
+    if (ctx.measureText(test).width > maxWidth && i > 0) {
       lines.push(line);
       line = words[i] + " ";
     } else {
-      line = testLine;
+      line = test;
     }
   }
   lines.push(line);
 
-  const offsetY = y - (lines.length - 1) * lineHeight / 2;
+  const startY = y - (lines.length - 1) * lineHeight / 2;
   lines.forEach((l, i) => {
-    ctx.fillText(l.trim(), x, offsetY + i * lineHeight);
+    ctx.fillText(l.trim(), 0, startY + i * lineHeight);
   });
 }
 
+/* DRAW WHEEL */
 function drawWheel() {
-  for (let i = 0; i < tasks.length; i++) {
-    const start = sliceAngle * i;
-    const end = start + sliceAngle;
+  ctx.clearRect(0, 0, size, size);
 
+  for (let i = 0; i < tasks.length; i++) {
+    const start = currentAngle + i * sliceAngle;
+    const end = start + sliceAngle;
+    const sliceColor = colors[i];
+
+    // slice
     ctx.beginPath();
     ctx.moveTo(center, center);
     ctx.arc(center, center, center, start, end);
-    ctx.fillStyle = colors[i % colors.length];
+    ctx.fillStyle = sliceColor;
+    ctx.fill();
 
+    // text
     ctx.save();
-ctx.translate(center, center);
+    ctx.translate(center, center);
+    ctx.rotate(start + sliceAngle / 2);
+    ctx.rotate(Math.PI / 2);
 
-// angle of the middle of the slice
-const middleAngle = startAngle + sliceAngle / 2;
+    ctx.fillStyle = getTextColor(sliceColor);
+    ctx.font = "12px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-// rotate to slice center
-ctx.rotate(middleAngle);
+    drawWrappedText(tasks[i], -center * 0.6, 140, 16);
 
-// keep text upright
-ctx.rotate(Math.PI / 2);
-
-ctx.textAlign = "center";
-ctx.textBaseline = "middle";
-
-// OPTIONAL: text color based on slice color
-const sliceColor = colors[i % colors.length];
-ctx.fillStyle = sliceColor;
-ctx.font = "12px Arial";
-
-drawWrappedText(
-  ctx,
-  tasks[i],
-  0,
-  -center * 0.6, // exact radial center of the slice
-  140,
-  16
-);
-
-ctx.restore();
+    ctx.restore();
   }
 }
 
-drawWheel();
-
 function spin() {
   const spinAngle = Math.random() * 360 + 1440;
-  currentAngle += spinAngle;
-
+  currentAngle += spinAngle * Math.PI / 180;
   canvas.style.transition = "transform 4s ease-out";
-  canvas.style.transform = `rotate(${currentAngle}deg)`;
-
-  const selectedIndex =
-    Math.floor(tasks.length - (currentAngle % 360) / (360 / tasks.length)) %
-    tasks.length;
-
-  setTimeout(() => {
-    document.getElementById("result").innerHTML =
-      "🎯 Görev: <b>" + tasks[selectedIndex] + "</b>";
-  }, 4000);
+  canvas.style.transform = `rotate(${currentAngle}rad)`;
 }
+
+drawWheel();
 </script>
 
 </body>
-</html>
-     
-
-
-  
+</html>  
 
