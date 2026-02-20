@@ -112,7 +112,7 @@ function drawWheel() {
     ctx.fill();
 
     ctx.save();
-    ctx.translate(center, center);
+    ctx.translate(başlangıç + dilim açısı / 2 - Math.PI / 2);
     ctx.rotate(start + sliceAngle / 2 - Math.PI / 2);
 
     ctx.textAlign = "right";
