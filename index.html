@@ -126,7 +126,8 @@ ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
 // OPTIONAL: text color based on slice color
-ctx.fillStyle = getTextColor(colors[i % colors.length]);
+const sliceColor = colors[i % colors.length];
+ctx.fillStyle = sliceColor;
 ctx.font = "12px Arial";
 
 drawWrappedText(
